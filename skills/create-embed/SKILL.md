@@ -24,6 +24,19 @@ Hubble provides the embed runtime. Write plain HTML that assumes these globals a
 
 Use Alpine and Tailwind by default. Do not add dependency `<script>` tags or set up package files, lockfiles, or `node_modules` for an embed.
 
+Embeds run in a sandboxed iframe. Hubble allows:
+
+- `allow-scripts`: Alpine, Tailwind browser, and the Hubble runtime can execute.
+- `allow-forms`: native HTML form semantics work when paired with Alpine handlers such as `@submit.prevent`.
+
+Hubble does not allow:
+
+- `allow-same-origin`: embeds keep an opaque origin and cannot use app-origin storage, cookies, or same-origin access.
+- `allow-top-navigation`: embeds cannot navigate the desktop app frame.
+- `allow-popups` / `allow-popups-to-escape-sandbox`: embeds cannot open unsandboxed popup windows.
+- `allow-downloads`: embeds cannot start downloads directly.
+- `allow-modals`: embeds cannot use modal browser dialogs.
+
 Available runtime APIs:
 
 ```

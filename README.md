@@ -4,16 +4,17 @@ Agent skills for [Hubble](https://github.com/bholmesdev/hubble.md).
 
 ## Skills
 
-- `create-embed`: Create workspace-local Hubble iframe HTML embeds with Alpine, Tailwind, Hubble theme tokens, and the injected `hubble` runtime API.
+- `create-html-app`: Create a Hubble HTML App — a folder-local `.html` file Hubble runs as a self-contained interactive UI. Apps get access to Alpine, Tailwind, Hubble theme tokens, and the injected `hubble` runtime API.
+- `create-embed`: Embed an HTML App inline inside a Markdown File with an iframe.
 
 ## Install
 
 ```bash
-npx skills add bholmesdev/hubble-skills --skill create-embed
+npx skills add bholmesdev/hubble-skills --skill create-html-app
 ```
 
 Pin a version with a git tag:
 
 ```bash
-npx skills add bholmesdev/hubble-skills#v0.1.0 --skill create-embed
+npx skills add bholmesdev/hubble-skills#v0.1.0 --skill create-html-app
 ```

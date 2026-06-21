@@ -17,7 +17,7 @@ Use labels, help text, and error text. Keep controls compact.
 	</label>
 
 	<p id="title-help" class="m-0 text-sm text-muted-foreground">
-		Shown in the workspace list.
+		Shown in the Folder list.
 	</p>
 
 	<p id="title-error" class="m-0 text-sm text-destructive" x-show="error" x-text="error"></p>

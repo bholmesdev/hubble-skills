@@ -34,12 +34,26 @@ Hubble does not allow:
 - `allow-downloads`: apps cannot start downloads directly.
 - `allow-modals`: apps cannot use modal browser dialogs.
 
-Apps access Folder files through the async broker, not direct filesystem access:
+## Files API
+
+Apps reach Workspace files through `hubble.files`, an async broker rather than direct filesystem access. All paths are Workspace-relative and point to Markdown files.
 
 ```
-await hubble.files.list("**/*.md");
-await hubble.files.read("path/inside/folder.md");
+await hubble.files.list("todos/*.md")
+// → [{ name, path, modified_at, size }], sorted by path
+await hubble.files.read("notes/today.md")
+// → { path, body, properties }
+await hubble.files.open("notes/today.md")
+// → { path }, navigates the editor to the file
+await hubble.files.create({ path, body, properties, open })
+// → { path, body, properties }
+await hubble.files.update(path, { body, properties })
+// → { path, body, properties }, patch
+await hubble.files.remove("notes/today.md")
+// → { path }
 ```
+
+Methods throw on failure; each has a `safe*` variant. See [Files API](references/files-api.md) for shapes, patch semantics, and error handling.
 
 ## Template
 
@@ -106,8 +120,10 @@ Avoid one-off palettes, oversized cards, hero layouts, and decorative gradients 
 
 Read only the patterns you need:
 
+- [Files API](references/files-api.md)
 - [Buttons](references/buttons.md)
 - [Radio selects](references/radio-selects.md)
 - [Tabs](references/tabs.md)
 - [Forms](references/forms.md)
 - [Lists and empty states](references/lists-and-empty-states.md)
+

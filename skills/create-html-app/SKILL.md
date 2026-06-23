@@ -15,7 +15,7 @@ To embed an HTML App inline inside a Markdown File, see `create-embed`.
 Hubble provides the app runtime. Write plain HTML that assumes these globals are already available:
 
 - `hubble`
-- Alpine
+- `Alpine`
 - Tailwind browser v4
 - Hubble theme tokens
 
@@ -101,6 +101,38 @@ Methods throw on failure; each has a `safe*` variant. See [Files API](references
 	</body>
 </html>
 ```
+
+## Structuring Logic
+
+Inline `x-data` is fine for simple state (a flag, a counter, a current tab). For anything more, like async loaders, multiple methods, or computed logic, register an `Alpine.data()` component in a `<script>` and reference it by name.
+
+```ts
+<script>
+	document.addEventListener('alpine:init', () => {
+		Alpine.data('fileList', () => ({
+			files: [],
+			error: '',
+			async init() {
+				try {
+					this.files = await hubble.files.list('**/*.md')
+				} catch (error) {
+					this.error = error.message || 'Could not load files'
+				}
+			},
+		}))
+	})
+</script>
+
+<main x-data="fileList">…</main>
+```
+
+Why this beats large inline expressions:
+
+- Alpine parses `x-data` as a single expression. Multi-line bodies with arrow functions, object methods, or `<`/`>`/`&` get HTML-escaped or mis-parsed, surfacing as silent "Alpine Expression Error" failures.
+- Logic lives in real JavaScript with syntax highlighting and normal quoting, not inside an attribute string.
+- Components are reusable and testable, and keep markup readable.
+
+Register components inside `alpine:init` so they exist before Alpine scans the DOM.
 
 ## Native Feel
 

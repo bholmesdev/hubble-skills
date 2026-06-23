@@ -1,5 +1,5 @@
 ---
-name: "create-embed"
+name: "embed-html-app"
 description: "Embed a Hubble HTML App inline inside a Markdown File using an iframe block.
 Use when an app should be viewed in the context of a document."
 ---

@@ -18,14 +18,18 @@ Hubble stores review state in the Markdown body using this portable subset:
 {~~original text~>replacement text~~}
 ```
 
-Thread state may follow a comment anchor as an encoded HTML comment:
+Thread state may follow a comment anchor as an HTML comment holding raw JSON.
+It is not URI-encoded; Hubble parses it with `JSON.parse` directly, so an
+encoded payload fails to parse and renders as literal text in the note:
 
 ```md
-<!-- hubble-review:%7B%22replies%22%3A%5B%5D%2C%22resolved%22%3Afalse%7D-->
+<!-- hubble-review:{"v":1,"replies":[],"resolved":false}-->
 ```
 
-The decoded metadata is a JSON object. Hubble uses `replies` and `resolved`;
-other top-level keys are allowed. A reply has this shape:
+Hubble uses `v`, `replies`, and `resolved`; other top-level keys are allowed.
+Always write `"v": 1`. Escape any `--` inside the JSON as `\u002d\u002d`,
+since a literal `--` terminates the HTML comment early. A reply has this
+shape:
 
 ```json
 {
@@ -46,18 +50,18 @@ comments.
    instead. Confirm the anchored text and comment body match the user's
    request. If the id or exact anchor is absent or ambiguous, stop and report
    the ambiguity.
-2. Decode the metadata immediately following that logical comment: URI
-   decoding, then JSON parsing. If it is absent, start from an empty object.
-   If it is malformed, stop rather than overwrite it.
+2. Parse the JSON metadata immediately following that logical comment. If it
+   is absent, start from an empty object. If it is malformed, stop rather
+   than overwrite it.
 3. Round-trip the metadata: mutate only the reply list and `resolved`, then
-   re-encode the complete object — every other key and every existing reply
-   survives unchanged. Replies are append-only: add a reply with the next
-   unused `rN` id, `author: "agent"`, the response body, and the current UTC
-   time as an ISO-8601 `createdAt`.
+   re-serialize the complete object — every other key and every existing
+   reply survives unchanged. Replies are append-only: add a reply with the
+   next unused `rN` id, `author: "agent"`, the response body, and the current
+   UTC time as an ISO-8601 `createdAt`.
 4. Set `resolved: true` only when the user's request has actually been
    addressed. For an explicit reopen request, set `resolved: false`.
    Acknowledgements, tests, questions, and partial work leave it `false`.
-5. Write the encoded block immediately after the comment's `{#cN}` marker
+5. Write the metadata block immediately after the comment's `{#cN}` marker
    (see Fragmented anchors). Keep the anchored text byte-for-byte unchanged,
    along with the comment body, CriticMarkup delimiters, suggested edits, and
    all unrelated Markdown.
@@ -76,9 +80,10 @@ After editing:
 
 1. Re-read the file and confirm the requested id and exact anchored text are
    still present.
-2. Decode the metadata after the final fragment and verify the new reply is
-   the final reply, the old replies and other keys round-tripped, and
-   `resolved` has the intended value.
+2. Parse the metadata after the final fragment and verify it is valid JSON,
+   the new reply is the final reply, the old replies and other keys
+   round-tripped, and `resolved` has the intended value. Confirm the note
+   renders the comment rather than showing the raw block as text.
 3. Check the surrounding Markdown for accidental changes: inspect
    `git diff -- <file>` for a tracked file, or compare the before and after
    text for an ignored/generated file.

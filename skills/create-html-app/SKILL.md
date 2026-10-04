@@ -15,11 +15,13 @@ To embed an HTML App inline inside a Markdown File, see `create-embed`.
 Hubble provides the app runtime. Write plain HTML that assumes these globals are already available:
 
 - `hubble`
-- `Alpine`
+- `Alpine` — the core. Confirm which Alpine plugins ship before relying on them (e.g. `x-collapse`, `x-transition`, focus, persist). A directive from a plugin that is not bundled silently no-ops instead of erroring, so the animation or behavior just never happens.
 - Tailwind browser v4
 - Hubble theme tokens
 
-Use Alpine and Tailwind by default. Do not add dependency `<script>` tags or set up package files, lockfiles, or `node_modules`.
+Use Alpine and Tailwind by default. Do not add dependency `<script>` tags or set up package files, lockfiles, or `node_modules`. Because no external scripts load, CDN-based libraries (Mermaid, Chart.js, D3, and similar) will not run — build visuals natively with HTML, Tailwind, and Alpine, or precompute them outside the app.
+
+These globals exist only inside Hubble, which injects them. Opening the `.html` file directly in a browser renders a blank or broken page, so preview and test the app from within Hubble.
 
 HTML Apps run in a sandboxed iframe. Hubble allows:
 
@@ -33,6 +35,8 @@ Hubble does not allow:
 - `allow-popups` / `allow-popups-to-escape-sandbox`: apps cannot open unsandboxed popup windows.
 - `allow-downloads`: apps cannot start downloads directly.
 - `allow-modals`: apps cannot use modal browser dialogs.
+
+Because apps have no same-origin access, `localStorage`, `sessionStorage`, and cookies are unavailable. Persist any state that must survive a reload through the Files API (Markdown files), described below — not browser storage.
 
 ## Files API
 
@@ -106,7 +110,7 @@ Methods throw on failure; each has a `safe*` variant. See [Files API](references
 
 Inline `x-data` is fine for simple state (a flag, a counter, a current tab). For anything more, like async loaders, multiple methods, or computed logic, register an `Alpine.data()` component in a `<script>` and reference it by name.
 
-```ts
+```html
 <script>
 	document.addEventListener('alpine:init', () => {
 		Alpine.data('fileList', () => ({

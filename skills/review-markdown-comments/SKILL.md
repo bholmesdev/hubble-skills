@@ -18,6 +18,30 @@ Hubble stores review state in the Markdown body using this portable subset:
 {~~original text~>replacement text~~}
 ```
 
+The comment body belongs on one line. A body that needs more than one
+paragraph keeps its line breaks as escaped `\n` in the file, so the whole
+body stays inside one line of Markdown:
+
+```md
+{==anchored text==}{>>First line.\n\nSecond paragraph.<<}{#c1}
+```
+
+Hubble reads that back as a body with a real blank line between the two
+paragraphs, and writes it back the same way. A literal blank line in the
+body instead splits the Markdown into separate blocks, which puts the opener
+and the closer apart and leaves the raw syntax in the note.
+
+Write the id as `{#c1}`. Newer Hubble versions also read it from a
+Roughdraft-style attribute block, which carries more than the id and is
+preserved as it is:
+
+```md
+{==anchored text==}{>>comment body<<}{id="c1" by="user" at="2026-09-21T03:14:22.721Z"}
+```
+
+On older versions that attribute is left visible in the note and the thread
+has no id at all, so `{#c1}` is the form to write.
+
 Thread state may follow a comment anchor as an HTML comment holding raw JSON.
 It is not URI-encoded; Hubble parses it with `JSON.parse` directly, so an
 encoded payload fails to parse and renders as literal text in the note:
@@ -25,6 +49,11 @@ encoded payload fails to parse and renders as literal text in the note:
 ```md
 <!-- hubble-review:{"v":1,"replies":[],"resolved":false}-->
 ```
+
+Write the block inline, directly after the `{#cN}` marker, so the comment
+and its thread stay together in one line. Hubble also reads a block that
+sits on the line below the comment, but older versions leave it visible in
+the note as a raw HTML comment.
 
 Hubble uses `v`, `replies`, and `resolved`; other top-level keys are allowed.
 Always write `"v": 1`. Escape any `--` inside the JSON as `\u002d\u002d`,
@@ -52,7 +81,7 @@ comments.
    the ambiguity.
 2. Parse the JSON metadata immediately following that logical comment. If it
    is absent, start from an empty object. If it is malformed, stop rather
-   than overwrite it.
+   than overwrite it. Read the raw JSON directly; it is not URI-encoded.
 3. Round-trip the metadata: mutate only the reply list and `resolved`, then
    re-serialize the complete object — every other key and every existing
    reply survives unchanged. Replies are append-only: add a reply with the
@@ -83,7 +112,10 @@ After editing:
 2. Parse the metadata after the final fragment and verify it is valid JSON,
    the new reply is the final reply, the old replies and other keys
    round-tripped, and `resolved` has the intended value. Confirm the note
-   renders the comment rather than showing the raw block as text.
+   renders the comment rather than showing the raw block as text. Check that
+   no `{==`, `==}`, `{>>`, `<<}`, `{#`, or `{id=` is left visible in the
+   body, and that a body spanning paragraphs still has its line breaks
+   escaped as `\n`.
 3. Check the surrounding Markdown for accidental changes: inspect
    `git diff -- <file>` for a tracked file, or compare the before and after
    text for an ignored/generated file.

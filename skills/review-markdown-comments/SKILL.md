@@ -83,7 +83,10 @@ After editing:
 2. Parse the metadata after the final fragment and verify it is valid JSON,
    the new reply is the final reply, the old replies and other keys
    round-tripped, and `resolved` has the intended value. Confirm the note
-   renders the comment rather than showing the raw block as text.
+   renders the comment rather than showing the raw block as text. Check that
+   every `{==`, `==}`, `{>>`, `<<}`, and `{#` you touched belongs to a
+   complete `{==…==}{>>…<<}{#cN}` span on one line; a stray delimiter means
+   the span will not parse and shows as raw text in the note.
 3. Check the surrounding Markdown for accidental changes: inspect
    `git diff -- <file>` for a tracked file, or compare the before and after
    text for an ignored/generated file.

@@ -1,5 +1,8 @@
 # Hubble Skills
 
+> [!IMPORTANT]
+> Hubble skills have migrated into the [official Hubble repo](https://github.com/bholmesdev/hubble.md/tree/main/.agents/skills), and Hubble now installs and updates them for you.
+
 Agent skills for [Hubble](https://github.com/bholmesdev/hubble.md).
 
 ## Install
